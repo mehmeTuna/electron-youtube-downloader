@@ -587,7 +587,7 @@ var app = (function () {
     			create_component(searchinput.$$.fragment);
     			t0 = space();
     			t1 = text(/*$inputValue*/ ctx[0]);
-    			add_location(main, file$1, 10, 0, 188);
+    			add_location(main, file$1, 11, 0, 276);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -634,9 +634,11 @@ var app = (function () {
     	component_subscribe($$self, inputValue, $$value => $$invalidate(0, $inputValue = $$value));
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots("App", slots, []);
+    	const { ipcRenderer } = require("electron");
 
     	const searchData = () => {
     		console.log("calisti");
+    		ipcRenderer.sendSync("yt-data", "a");
     	};
 
     	const writable_props = [];
@@ -646,6 +648,7 @@ var app = (function () {
     	});
 
     	$$self.$capture_state = () => ({
+    		ipcRenderer,
     		inputValue,
     		SearchInput,
     		searchData,
@@ -669,11 +672,25 @@ var app = (function () {
     	}
     }
 
+    const { ipcRenderer } = require("electron");
+
+    const ytdl = require("ytdl-core");
+
+    const ytUrl = "https://www.youtube.com/watch?v=HNHKsJsShhM";
+
+    ipcRenderer.on("yt-data", (event, arg) => {
+      console.log("on kısmı çalıştı");
+      return new Promise((resolve, reject) => {
+        ytdl.getBasicInfo(ytUrl, (err, info) => {
+          if (err) reject(err);
+          console.log(info);
+          resolve(info);
+        });
+      });
+    });
+
     const app = new App({
-    	target: document.body,
-    	props: {
-    		name: 'world'
-    	}
+      target: document.body,
     });
 
     return app;
